@@ -76,3 +76,28 @@ def registrar_libro(libros):
     libros.append(nuevo_libro)
     guardar_json(ARCH_LIBROS, libros)
     print("✓ Libro registrado con éxito.")
+
+def listar_libros(libros):
+    """RF02: Muestra la lista de libros registrada."""
+    print("\n--- LISTADO DE LIBROS ---")
+    if not libros:
+        print("No hay libros registrados en el sistema.")
+        return
+    for l in libros:
+        prestados = l["cantidad_total"] - l["cantidad_disponible"]
+        print(f"[{l['codigo']}] {l['titulo']} - Autor: {l['autor']} | "
+              f"Total: {l['cantidad_total']} | Disponibles: {l['cantidad_disponible']} | Prestados: {prestados}")
+
+def consultar_libro_por_codigo(libros):
+    """RF03: Busca un libro por su código."""
+    print("\n--- BUSCAR LIBRO ---")
+    codigo = input("Ingrese el código del libro a buscar: ")
+    libro = buscar_libro(libros, codigo)
+    if libro:
+        prestados = libro["cantidad_total"] - libro["cantidad_disponible"]
+        print(f"\nCódigo: {libro['codigo']}\nISBN: {libro['isbn']}\nTítulo: {libro['titulo']}\n"
+              f"Autor: {libro['autor']}\nCategoría: {libro['categoria']}\nEditorial: {libro['editorial']}\n"
+              f"Año: {libro['anio']}\nTotal: {libro['cantidad_total']}\nDisponibles: {libro['cantidad_disponible']}\n"
+              f"Prestados: {prestados}")
+    else:
+        print("Error: Libro no encontrado.")
