@@ -101,3 +101,60 @@ def consultar_libro_por_codigo(libros):
               f"Prestados: {prestados}")
     else:
         print("Error: Libro no encontrado.")
+
+def actualizar_libro(libros, prestamos):
+    """RF04: Actualiza información del libro ajustando límites según préstamos activos."""
+    print("\n--- ACTUALIZAR LIBRO ---")
+    codigo = input("Código del libro a actualizar: ")
+    libro = buscar_libro(libros, codigo)
+    if not libro:
+        print("Error: Libro no encontrado.")
+        return
+
+    prestamos_activos = sum(1 for p in prestamos if p["codigo_libro"] == libro["codigo"] and p["estado"] == "ACTIVO")
+
+    print(f"Modificando: {libro['titulo']}")
+    nuevo_titulo = input(f"Título [{libro['titulo']}]: ").strip() or libro['titulo']
+    nuevo_autor = input(f"Autor [{libro['autor']}]: ").strip() or libro['autor']
+    nueva_categoria = input(f"Categoría [{libro['categoria']}]: ").strip() or libro['categoria']
+    nueva_editorial = input(f"Editorial [{libro['editorial']}]: ").strip() or libro['editorial']
+
+    try:
+        nuevo_total_str = input(f"Cantidad total [{libro['cantidad_total']}]: ").strip()
+        nuevo_total = int(nuevo_total_str) if nuevo_total_str else libro['cantidad_total']
+        if nuevo_total < prestamos_activos:
+            print(f"Error: La cantidad no puede ser inferior a los préstamos activos ({prestamos_activos}).")
+            return
+    except ValueError:
+        print("Error: Valor numérico inválido.")
+        return
+
+    diferencia = nuevo_total - libro['cantidad_total']
+    libro['titulo'] = nuevo_titulo
+    libro['autor'] = nuevo_autor
+    libro['categoria'] = nueva_categoria
+    libro['editorial'] = nueva_editorial
+    libro['cantidad_total'] = nuevo_total
+    libro['cantidad_disponible'] += diferencia
+
+    guardar_json(ARCH_LIBROS, libros)
+    print("✓ Libro actualizado correctamente.")
+
+def eliminar_libro(libros, prestamos):
+    """RF05: Elimina un libro si no posee préstamos activos."""
+    print("\n--- ELIMINAR LIBRO ---")
+    codigo = input("Código del libro a eliminar: ")
+    libro = buscar_libro(libros, codigo)
+    if not libro:
+        print("Error: Libro no encontrado.")
+        return
+
+    tiene_activos = any(p["codigo_libro"] == libro["codigo"] and p["estado"] == "ACTIVO" for p in prestamos)
+    if tiene_activos:
+        print("Error: No se puede eliminar un libro con préstamos activos.")
+        return
+
+    libros.remove(libro)
+    guardar_json(ARCH_LIBROS, libros)
+    print("✓ Libro eliminado del catálogo.")
+
