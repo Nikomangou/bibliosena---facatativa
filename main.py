@@ -246,7 +246,7 @@ def registrar_devolucion(libros, prestamos):
     guardar_json(ARCH_PRESTAMOS, prestamos)
     print("✓ Devolución registrada correctamente.")
 
-    def reporte_prestamos_activos(libros, prestamos):
+def reporte_prestamos_activos(libros, prestamos):
     """Reporte 1: Préstamos activos con títulos asociados."""
     print("\n--- LIBROS ACTUALLY PRESTADOS ---")
     activos = [p for p in prestamos if p["estado"] == "ACTIVO"]
@@ -281,3 +281,4 @@ def reporte_historial_usuario(libros, prestamos):
         l = buscar_libro(libros, p["codigo_libro"])
         titulo = l["titulo"] if l else "Desconocido"
         print(f"- Libro: {titulo} | Estado: {p['estado']} | Fecha: {p['fecha_prestamo']}")
+        
