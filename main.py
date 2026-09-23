@@ -305,3 +305,51 @@ def auditoria_inventario(libros, prestamos):
         estado = "CORRECTO" if disponible_calc == l["cantidad_disponible"] else "ALERTA"
         print(f"{l['codigo']} | Total: {l['cantidad_total']} | Activos: {activos} | "
               f"Disp. Reg: {l['cantidad_disponible']} | Disp. Calc: {disponible_calc} | [{estado}]")
+
+
+def menu_libros(libros, prestamos):
+    while True:
+        print("\n=== GESTIÓN DE LIBROS ===")
+        print("1. Registrar libro\n2. Listar libros\n3. Buscar libro\n4. Actualizar libro\n5. Eliminar libro\n6. Regresar")
+        opc = input("Opción: ").strip()
+        if opc == "1": registrar_libro(libros)
+        elif opc == "2": listar_libros(libros)
+        elif opc == "3": consultar_libro_por_codigo(libros)
+        elif opc == "4": actualizar_libro(libros, prestamos)
+        elif opc == "5": eliminar_libro(libros, prestamos)
+        elif opc == "6": break
+
+def menu_reportes(libros, prestamos):
+    while True:
+        print("\n=== REPORTES ===")
+        print("1. Préstamos activos\n2. Libros sin disponibilidad\n3. Historial por usuario\n4. Libros más prestados\n5. Auditoría de inventario\n6. Regresar")
+        opc = input("Opción: ").strip()
+        if opc == "1": reporte_prestamos_activos(libros, prestamos)
+        elif opc == "2": reporte_sin_disponibilidad(libros)
+        elif opc == "3": reporte_historial_usuario(libros, prestamos)
+        elif opc == "4": reporte_libros_mas_prestados(libros, prestamos)
+        elif opc == "5": auditoria_inventario(libros, prestamos)
+        elif opc == "6": break
+
+def menu_principal():
+    libros = cargar_json(ARCH_LIBROS)
+    prestamos = cargar_json(ARCH_PRESTAMOS)
+    while True:
+        print("\n=== BIBLIOSENA FACATATIVÁ ===")
+        print("1. Gestión de libros\n2. Registrar préstamo\n3. Registrar devolución\n4. Consultar préstamos\n5. Reportes\n6. Guardar información\n7. Salir")
+        opc = input("Opción: ").strip()
+        if opc == "1": menu_libros(libros, prestamos)
+        elif opc == "2": registrar_prestamo(libros, prestamos)
+        elif opc == "3": registrar_devolucion(libros, prestamos)
+        elif opc == "4": consultar_prestamos(prestamos)
+        elif opc == "5": menu_reportes(libros, prestamos)
+        elif opc == "6":
+            guardar_json(ARCH_LIBROS, libros)
+            guardar_json(ARCH_PRESTAMOS, prestamos)
+            print("✓ Datos guardados.")
+        elif opc == "7":
+            print("¡Hasta luego!")
+            break
+
+if __name__ == "__main__":
+    menu_principal()
