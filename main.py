@@ -281,4 +281,27 @@ def reporte_historial_usuario(libros, prestamos):
         l = buscar_libro(libros, p["codigo_libro"])
         titulo = l["titulo"] if l else "Desconocido"
         print(f"- Libro: {titulo} | Estado: {p['estado']} | Fecha: {p['fecha_prestamo']}")
-        
+
+def reporte_libros_mas_prestados(libros, prestamos):
+    """Reporte Avanzado: Frecuencia de préstamos por título."""
+    print("\n--- LIBROS MÁS PRESTADOS ---")
+    conteo = {}
+    for p in prestamos:
+        cod = p["codigo_libro"]
+        conteo[cod] = conteo.get(cod, 0) + 1
+    
+    ordenados = sorted(conteo.items(), key=lambda x: x[1], reverse=True)
+    for cod, total in ordenados:
+        l = buscar_libro(libros, cod)
+        titulo = l["titulo"] if l else "Desconocido"
+        print(f"{titulo} ({cod}): {total} préstamo(s)")
+
+def auditoria_inventario(libros, prestamos):
+    """Desafío Final: Verificación de coherencia del inventario."""
+    print("\n--- AUDITORÍA DE INVENTARIO ---")
+    for l in libros:
+        activos = sum(1 for p in prestamos if p["codigo_libro"] == l["codigo"] and p["estado"] == "ACTIVO")
+        disponible_calc = l["cantidad_total"] - activos
+        estado = "CORRECTO" if disponible_calc == l["cantidad_disponible"] else "ALERTA"
+        print(f"{l['codigo']} | Total: {l['cantidad_total']} | Activos: {activos} | "
+              f"Disp. Reg: {l['cantidad_disponible']} | Disp. Calc: {disponible_calc} | [{estado}]")
