@@ -1,1 +1,24 @@
-[]
+[
+    {
+        "codigo": "L001",
+        "isbn": "9789580000001",
+        "titulo": "Introducción a Python",
+        "autor": "Carlos Pérez",
+        "categoria": "Programación",
+        "editorial": "Editorial Técnica",
+        "anio": 2025,
+        "cantidad_total": 5,
+        "cantidad_disponible": 5
+    },
+    {
+        "codigo": "L002",
+        "isbn": "9789580000002",
+        "titulo": "Fundamentos de Bases de Datos",
+        "autor": "Laura Gómez",
+        "categoria": "Bases de Datos",
+        "editorial": "SENA Ed",
+        "anio": 2024,
+        "cantidad_total": 4,
+        "cantidad_disponible": 4
+    }
+]
