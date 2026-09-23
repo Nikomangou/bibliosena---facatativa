@@ -246,4 +246,38 @@ def registrar_devolucion(libros, prestamos):
     guardar_json(ARCH_PRESTAMOS, prestamos)
     print("✓ Devolución registrada correctamente.")
 
-    
+    def reporte_prestamos_activos(libros, prestamos):
+    """Reporte 1: Préstamos activos con títulos asociados."""
+    print("\n--- LIBROS ACTUALLY PRESTADOS ---")
+    activos = [p for p in prestamos if p["estado"] == "ACTIVO"]
+    if not activos:
+        print("No hay préstamos activos.")
+        return
+    for p in activos:
+        l = buscar_libro(libros, p["codigo_libro"])
+        titulo = l["titulo"] if l else "Desconocido"
+        print(f"ID: {p['id_prestamo']} | Título: {titulo} | Usuario: {p['nombre_usuario']} | Límite: {p['fecha_limite']}")
+
+def reporte_sin_disponibilidad(libros):
+    """Reporte 2: Libros agotados."""
+    print("\n--- LIBROS SIN DISPONIBILIDAD ---")
+    agotados = [l for l in libros if l["cantidad_disponible"] == 0]
+    if not agotados:
+        print("Todos los libros tienen ejemplares disponibles.")
+        return
+    for l in agotados:
+        print(f"[{l['codigo']}] {l['titulo']} - Categ: {l['categoria']}")
+
+def reporte_historial_usuario(libros, prestamos):
+    """Reporte 3: Búsqueda de historial por documento de usuario."""
+    print("\n--- HISTORIAL POR USUARIO ---")
+    doc = input("Ingrese el documento del usuario: ").strip()
+    filtrados = [p for p in prestamos if p["documento_usuario"] == doc]
+    if not filtrados:
+        print("No se registraron préstamos para este usuario.")
+        return
+    print(f"Historial del usuario {doc}:")
+    for p in filtrados:
+        l = buscar_libro(libros, p["codigo_libro"])
+        titulo = l["titulo"] if l else "Desconocido"
+        print(f"- Libro: {titulo} | Estado: {p['estado']} | Fecha: {p['fecha_prestamo']}")
