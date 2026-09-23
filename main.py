@@ -215,3 +215,35 @@ def consultar_prestamos(prestamos):
         return
     for p in prestamos:
         print(f"ID: {p['id_prestamo']} | Libro: {p['codigo_libro']} | Usuario: {p['nombre_usuario']} ({p['documento_usuario']}) | Estado: {p['estado']}")
+
+def registrar_devolucion(libros, prestamos):
+    """RF09, RF10: Registra la devolución de un libro prestado."""
+    print("\n--- REGISTRAR DEVOLUCIÓN ---")
+    try:
+        id_p = int(input("Ingrese el ID del préstamo: "))
+    except ValueError:
+        print("Error: El ID debe ser un número entero.")
+        return
+
+    prestamo = next((p for p in prestamos if p["id_prestamo"] == id_p), None)
+    if not prestamo:
+        print("Error: Préstamo no encontrado.")
+        return
+
+    if prestamo["estado"] == "DEVUELTO":
+        print("Error: Este préstamo ya fue devuelto con anterioridad.")
+        return
+
+    libro = buscar_libro(libros, prestamo["codigo_libro"])
+    
+    prestamo["estado"] = "DEVUELTO"
+    prestamo["fecha_devolucion"] = datetime.now().strftime("%Y-%m-%d")
+
+    if libro:
+        libro["cantidad_disponible"] += 1
+
+    guardar_json(ARCH_LIBROS, libros)
+    guardar_json(ARCH_PRESTAMOS, prestamos)
+    print("✓ Devolución registrada correctamente.")
+
+    
