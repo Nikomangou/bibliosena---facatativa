@@ -353,3 +353,132 @@ def menu_principal():
 
 if __name__ == "__main__":
     menu_principal()
+
+from datetime import datetime
+
+# REPORTES OBLIGATORIOS Y AVANZADOS
+
+def reporte_prestamos_activos(libros, prestamos):
+    """Reporte 1: Libros actualmente prestados."""
+    print("\n--- REPORTES: PRÉSTAMOS ACTIVOS ---")
+    activos = [p for p in prestamos if p["estado"] == "ACTIVO"]
+    if not activos:
+        print("No hay préstamos activos registrados.")
+        return
+    
+    for p in activos:
+        libro = buscar_libro(libros, p["codigo_libro"])
+        titulo = libro["titulo"] if libro else "Título no encontrado"
+        print(f"ID: {p['id_prestamo']} | Título: {titulo} | Usuario: {p['nombre_usuario']} ({p['documento_usuario']}) | Fecha Límite: {p['fecha_limite']}")
+
+def reporte_sin_disponibilidad(libros):
+    """Reporte 2: Libros agotados."""
+    print("\n--- REPORTES: LIBROS SIN DISPONIBILIDAD ---")
+    agotados = [l for l in libros if l["cantidad_disponible"] == 0]
+    if not agotados:
+        print("Todos los libros tienen unidades disponibles.")
+        return
+    
+    for l in agotados:
+        print(f"[{l['codigo']}] {l['titulo']} - Categoría: {l['categoria']} (Total: {l['cantidad_total']})")
+
+def reporte_historial_usuario(libros, prestamos):
+    """Reporte 3: Historial por usuario."""
+    print("\n--- REPORTES: HISTORIAL POR USUARIO ---")
+    doc = input("Ingrese el documento del usuario: ").strip()
+    historial = [p for p in prestamos if p["documento_usuario"] == doc]
+    
+    if not historial:
+        print("No se encontraron préstamos para el documento ingresado.")
+        return
+    
+    activos = sum(1 for p in historial if p["estado"] == "ACTIVO")
+    devueltos = sum(1 for p in historial if p["estado"] == "DEVUELTO")
+    print(f"\nUsuario Documento: {doc} (Activos: {activos} | Devueltos: {devueltos})")
+    
+    for p in historial:
+        libro = buscar_libro(libros, p["codigo_libro"])
+        titulo = libro["titulo"] if libro else "Desconocido"
+        print(f"- ID: {p['id_prestamo']} | Libro: {titulo} | Estado: {p['estado']} | Fecha: {p['fecha_prestamo']}")
+
+def reporte_libros_mas_prestados(libros, prestamos):
+    """Reporte Avanzado: Ranking de demanda de libros."""
+    print("\n--- REPORTES: LIBROS MÁS PRESTADOS ---")
+    if not prestamos:
+        print("No hay préstamos registrados para realizar el ranking.")
+        return
+    
+    conteo = {}
+    for p in prestamos:
+        cod = p["codigo_libro"]
+        conteo[cod] = conteo.get(cod, 0) + 1
+    
+    ranking = sorted(conteo.items(), key=lambda x: x[1], reverse=True)
+    for cod, total in ranking:
+        libro = buscar_libro(libros, cod)
+        titulo = libro["titulo"] if libro else "Desconocido"
+        print(f"{titulo} ({cod}): {total} préstamo(s)")
+
+def reporte_vencidos(libros, prestamos):
+    """Reporte Avanzado: Préstamos activos vencidos."""
+    print("\n--- REPORTES: PRÉSTAMOS VENCIDOS ---")
+    hoy = datetime.now().date()
+    vencidos_hallados = False
+    
+    for p in prestamos:
+        if p["estado"] == "ACTIVO":
+            fecha_limite = datetime.strptime(p["fecha_limite"], "%Y-%m-%d").date()
+            if hoy > fecha_limite:
+                dias_retraso = (hoy - fecha_limite).days
+                libro = buscar_libro(libros, p["codigo_libro"])
+                titulo = libro["titulo"] if libro else "Desconocido"
+                print(f"ID: {p['id_prestamo']} | Título: {titulo} | Usuario: {p['nombre_usuario']} | Retraso: {dias_retraso} día(s)")
+                vencidos_hallados = True
+                
+    if not vencidos_hallados:
+        print("No hay préstamos vencidos a la fecha.")
+
+def auditoria_inventario(libros, prestamos):
+    """Desafío Final: Auditoría de coherencia de inventario."""
+    print("\n--- AUDITORÍA DE INVENTARIO ---")
+    if not libros:
+        print("No hay libros para auditar.")
+        return
+    
+    for l in libros:
+        activos = sum(1 for p in prestamos if p["codigo_libro"] == l["codigo"] and p["estado"] == "ACTIVO")
+        disponible_calc = l["cantidad_total"] - activos
+        coincide = disponible_calc == l["cantidad_disponible"]
+        estado = "CORRECTO" if coincide else "ALERTA"
+        
+        print(f"{l['codigo']} | Total: {l['cantidad_total']} | Activos: {activos} | "
+              f"Disp. Reg: {l['cantidad_disponible']} | Disp. Calc: {disponible_calc} | [{estado}]")
+
+def menu_reportes(libros, prestamos):
+    while True:
+        print("\n=== MÓDULO DE REPORTES ===")
+        print("1. Libros actualmente prestados")
+        print("2. Libros sin disponibilidad")
+        print("3. Historial por usuario")
+        print("4. Libros más prestados")
+        print("5. Préstamos vencidos")
+        print("6. Auditoría de inventario (Desafío Final)")
+        print("7. Regresar al menú principal")
+        
+        opcion = input("Seleccione una opción: ").strip()
+        if opcion == "1":
+            reporte_prestamos_activos(libros, prestamos)
+        elif opcion == "2":
+            reporte_sin_disponibilidad(libros)
+        elif opcion == "3":
+            reporte_historial_usuario(libros, prestamos)
+        elif opcion == "4":
+            reporte_libros_mas_prestados(libros, prestamos)
+        elif opcion == "5":
+            reporte_vencidos(libros, prestamos)
+        elif opcion == "6":
+            auditoria_inventario(libros, prestamos)
+        elif opcion == "7":
+            break
+        else:
+            print("Opción inválida.")
