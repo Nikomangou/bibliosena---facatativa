@@ -158,3 +158,60 @@ def eliminar_libro(libros, prestamos):
     guardar_json(ARCH_LIBROS, libros)
     print("✓ Libro eliminado del catálogo.")
 
+from datetime import datetime, timedelta
+
+def generar_id_prestamo(prestamos):
+    """Genera un ID incremental para cada préstamo."""
+    if not prestamos:
+        return 1
+    return max(p["id_prestamo"] for p in prestamos) + 1
+
+def registrar_prestamo(libros, prestamos):
+    """RF06, RF07, RF08: Registra préstamos de libros."""
+    print("\n--- REGISTRAR PRÉSTAMO ---")
+    codigo = input("Código del libro: ")
+    libro = buscar_libro(libros, codigo)
+
+    if not libro:
+        print("Error: El libro no existe.")
+        return
+    if libro["cantidad_disponible"] <= 0:
+        print("Error: No hay ejemplares disponibles para préstamo.")
+        return
+
+    doc = input("Documento del usuario: ").strip()
+    nombre = input("Nombre completo del usuario: ").strip()
+    if not doc or not nombre:
+        print("Error: Documento y nombre son datos obligatorios.")
+        return
+
+    hoy = datetime.now()
+    fecha_p = hoy.strftime("%Y-%m-%d")
+    fecha_l = (hoy + timedelta(days=7)).strftime("%Y-%m-%d")
+
+    nuevo_prestamo = {
+        "id_prestamo": generar_id_prestamo(prestamos),
+        "codigo_libro": libro["codigo"],
+        "documento_usuario": doc,
+        "nombre_usuario": nombre,
+        "fecha_prestamo": fecha_p,
+        "fecha_limite": fecha_l,
+        "fecha_devolucion": None,
+        "estado": "ACTIVO"
+    }
+
+    libro["cantidad_disponible"] -= 1
+    prestamos.append(nuevo_prestamo)
+
+    guardar_json(ARCH_LIBROS, libros)
+    guardar_json(ARCH_PRESTAMOS, prestamos)
+    print(f"✓ Préstamo registrado (ID: {nuevo_prestamo['id_prestamo']}). Devolver antes de: {fecha_l}")
+
+def consultar_prestamos(prestamos):
+    """RF11: Lista el historial general de préstamos."""
+    print("\n--- HISTORIAL DE PRÉSTAMOS ---")
+    if not prestamos:
+        print("Sin préstamos registrados.")
+        return
+    for p in prestamos:
+        print(f"ID: {p['id_prestamo']} | Libro: {p['codigo_libro']} | Usuario: {p['nombre_usuario']} ({p['documento_usuario']}) | Estado: {p['estado']}")
